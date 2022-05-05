@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 import com.nttdata.accountcard.service.entity.AccountCard;
@@ -84,5 +85,11 @@ public class AccountCardServiceImpl implements AccountCardService {
 	public Flux<AccountCard> findByIdCredit(Long idCard) {
 		// TODO Auto-generated method stub
 		return this.findAll().filter(e->e.getIdCard()==idCard);
+	}
+
+	@Override
+	public Mono<AccountCard> findByIdForExample(AccountCard accountCard) {
+		Example<AccountCard> example = Example.of(accountCard); 		
+		return accountCardRepository.findOne(example);
 	}
 }
