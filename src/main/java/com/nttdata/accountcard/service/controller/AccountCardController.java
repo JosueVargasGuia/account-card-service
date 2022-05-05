@@ -83,4 +83,9 @@ public class AccountCardController {
 					.then(Mono.just(ResponseEntity.ok().build()));
 		});
 	}
+	
+	@PostMapping("/findByIdForExample")
+	public Mono<AccountCard> findByIdForExample(@RequestBody AccountCard accountCard){
+		return accountCardService.findByIdForExample(accountCard);
+	}
 }
