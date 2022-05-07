@@ -1,6 +1,9 @@
 package com.nttdata.accountcard.service.entity;
 
+import java.io.Serializable;
 import java.util.Date;
+
+ 
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -20,8 +23,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 @Data
+ 
 @Document(collection = "account-card")
-public class AccountCard {
+public class AccountCard implements Serializable{ 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	@Id
 	private Long idAccountCard;
 	private Long idCard;
