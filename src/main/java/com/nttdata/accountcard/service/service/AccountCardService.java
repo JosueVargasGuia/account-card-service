@@ -1,7 +1,7 @@
 package com.nttdata.accountcard.service.service;
 
-import com.nttdata.accountcard.service.entity.AccountCard;
 
+import com.nttdata.accountcard.service.entity.AccountCard;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -20,5 +20,10 @@ public interface AccountCardService {
 
 	Flux<AccountCard> findByIdCredit(Long idCard);
 
+
 	Mono<AccountCard> findByAccountCardForExample(AccountCard accountCard);
+
+	
+	Mono<AccountCard> findByIdForExample(AccountCard accountCard);
+
 }
