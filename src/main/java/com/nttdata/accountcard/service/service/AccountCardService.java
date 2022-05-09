@@ -20,4 +20,5 @@ public interface AccountCardService {
 
 	Flux<AccountCard> findByIdCredit(Long idCard);
 
+	Mono<AccountCard> findByAccountCardForExample(AccountCard accountCard);
 }

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Example;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +25,11 @@ public class AccountCardServiceImpl implements AccountCardService {
 	@Autowired
 	AccountCardRepository accountCardRepository;
 //https://howtodoinjava.com/kafka/spring-boot-jsonserializer-example/
-	@Autowired
-	KafkaTemplate<String, String> kafkaTemplate;
+	//@Autowired
+	//KafkaTemplate<String, String> kafkaTemplate;
 
-	@Autowired
-	KafkaTemplate<String, AccountCard> kafkaTemplate2;
+	//@Autowired
+	//KafkaTemplate<String, AccountCard> kafkaTemplate2;
 
 	@Override
 	public Flux<AccountCard> findAll() {
@@ -47,12 +48,12 @@ public class AccountCardServiceImpl implements AccountCardService {
 	@Override
 	public Mono<AccountCard> findByIdMono(Long idAccountCard) {
 		// TODO Auto-generated method stub
-		log.info("Enviando mensaje...Kafka.....");
-		AccountCard accountCard = accountCardRepository.findById(idAccountCard).blockOptional()
-				.orElse(new AccountCard());
-		this.kafkaTemplate.send("TOPIC-DEMO", "Go-->KAFKA GO TO");
-		this.kafkaTemplate2.send("TOPIC-OBJECT", accountCard);
-		this.kafkaTemplate2.send("TOPIC-OBJECT1", accountCard);
+		//log.info("Enviando mensaje...Kafka.....");
+		//AccountCard accountCard = accountCardRepository.findById(idAccountCard).blockOptional()
+			//	.orElse(new AccountCard());
+		//this.kafkaTemplate.send("TOPIC-DEMO", "Go-->KAFKA GO TO");
+		//this.kafkaTemplate2.send("TOPIC-OBJECT", accountCard);
+		//this.kafkaTemplate2.send("TOPIC-OBJECT1", accountCard);
 		return accountCardRepository.findById(idAccountCard);
 	}
 
@@ -107,5 +108,11 @@ public class AccountCardServiceImpl implements AccountCardService {
 	public Flux<AccountCard> findByIdCredit(Long idCard) {
 		// TODO Auto-generated method stub
 		return this.findAll().filter(e -> e.getIdCard() == idCard);
+	}
+
+	@Override
+	public Mono<AccountCard> findByAccountCardForExample(AccountCard accountCard) {
+		// TODO Auto-generated method stub
+		return accountCardRepository.findOne(Example.of(accountCard));
 	}
 }
