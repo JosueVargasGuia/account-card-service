@@ -58,6 +58,7 @@ public class AccountCardController {
 	@GetMapping("/redis/{idAccountCard}")
 	@Cacheable(value = "AccountCardCache",key = "#idAccountCard")
 	public AccountCard findByIdRedis(@PathVariable(name = "idAccountCard") long idAccountCard) {
+		//https://www.vinsguru.com/spring-webflux-redis/
 		return accountCardService.findById(idAccountCard) ;
 	}
 
