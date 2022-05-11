@@ -3,6 +3,7 @@ package com.nttdata.accountcard.service.controller;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.nttdata.accountcard.service.entity.AccountCard;
@@ -24,7 +26,7 @@ import reactor.core.publisher.Mono;
 
 @Log4j2
 @RestController
-@RequestMapping("accountcard")
+@RequestMapping("/accountcard")
 public class AccountCardController {
 	@Autowired
 	AccountCardService accountCardService;
@@ -36,6 +38,7 @@ public class AccountCardController {
 	}
 
 	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
 	public Mono<ResponseEntity<AccountCard>> save(@RequestBody AccountCard accountCard) {
 		return accountCardService.save(accountCard).map(_accountCard -> ResponseEntity.ok().body(_accountCard))
 				.onErrorResume(e -> {
@@ -43,14 +46,20 @@ public class AccountCardController {
 					return Mono.just(ResponseEntity.badRequest().build());
 				});
 	}
-
-	@GetMapping("/{idAccountCard}")
+	
+	@GetMapping("/{idAccountCard}") 
 	public Mono<ResponseEntity<AccountCard>> findById(@PathVariable(name = "idAccountCard") long idAccountCard) {
-		return accountCardService.findById(idAccountCard).map(accountCard -> ResponseEntity.ok().body(accountCard))
+		return accountCardService.findByIdMono(idAccountCard).map(accountCard -> ResponseEntity.ok().body(accountCard))
 				.onErrorResume(e -> {
 					log.info(e.getMessage());
 					return Mono.just(ResponseEntity.badRequest().build());
 				}).defaultIfEmpty(ResponseEntity.noContent().build());
+	}
+	@GetMapping("/redis/{idAccountCard}")
+	@Cacheable(value = "AccountCardCache",key = "#idAccountCard")
+	public AccountCard findByIdRedis(@PathVariable(name = "idAccountCard") long idAccountCard) {
+		//https://www.vinsguru.com/spring-webflux-redis/
+		return accountCardService.findById(idAccountCard) ;
 	}
 
 	@GetMapping("/findByidCard/{idCard}")
@@ -61,7 +70,7 @@ public class AccountCardController {
 	@PutMapping
 	public Mono<ResponseEntity<AccountCard>> update(@RequestBody AccountCard accountCard) {
 
-		Mono<AccountCard> mono = accountCardService.findById(accountCard.getIdAccountCard()).flatMap(objAccountCard -> {
+		Mono<AccountCard> mono = accountCardService.findByIdMono(accountCard.getIdAccountCard()).flatMap(objAccountCard -> {
 			log.info("Update:[new]" + accountCard + " [Old]:" + objAccountCard);
 			return accountCardService.update(accountCard);
 		});
@@ -78,7 +87,7 @@ public class AccountCardController {
 
 	@DeleteMapping("/{idAccountCard}")
 	public Mono<ResponseEntity<Void>> delete(@PathVariable(name = "idAccountCard") long idAccountCard) {
-		return accountCardService.findById(idAccountCard).flatMap(accountCard -> {
+		return accountCardService.findByIdMono(idAccountCard).flatMap(accountCard -> {
 			return accountCardService.delete(accountCard.getIdAccountCard())
 					.then(Mono.just(ResponseEntity.ok().build()));
 		});

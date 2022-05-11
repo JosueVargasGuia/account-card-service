@@ -8,15 +8,22 @@ import reactor.core.publisher.Mono;
 public interface AccountCardService {
 	Flux<AccountCard> findAll();
 
-	Mono<AccountCard> findById(Long idAccountCard);
+	AccountCard findById(Long idAccountCard);
+
+	Mono<AccountCard> findByIdMono(Long idAccountCard);
 
 	Mono<AccountCard> save(AccountCard accountCard);
 
 	Mono<AccountCard> update(AccountCard accountCard);
 
 	Mono<Void> delete(Long idAccountCard);
-	
+
 	Flux<AccountCard> findByIdCredit(Long idCard);
+
+
+	Mono<AccountCard> findByAccountCardForExample(AccountCard accountCard);
+
 	
 	Mono<AccountCard> findByIdForExample(AccountCard accountCard);
+
 }

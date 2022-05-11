@@ -5,7 +5,14 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
+import org.springframework.kafka.core.KafkaTemplate;
+
+import org.springframework.data.domain.Example;
+
 import org.springframework.stereotype.Service;
 
 import com.nttdata.accountcard.service.entity.AccountCard;
@@ -15,11 +22,18 @@ import com.nttdata.accountcard.service.service.AccountCardService;
 import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 @Log4j2
 @Service
 public class AccountCardServiceImpl implements AccountCardService {
 	@Autowired
 	AccountCardRepository accountCardRepository;
+//https://howtodoinjava.com/kafka/spring-boot-jsonserializer-example/
+	//@Autowired
+	//KafkaTemplate<String, String> kafkaTemplate;
+
+	//@Autowired
+	//KafkaTemplate<String, AccountCard> kafkaTemplate2;
 
 	@Override
 	public Flux<AccountCard> findAll() {
@@ -27,9 +41,23 @@ public class AccountCardServiceImpl implements AccountCardService {
 		return accountCardRepository.findAll().sort((o, o1) -> o.getIdAccountCard().compareTo(o1.getIdAccountCard()));
 	}
 
+	@Cacheable(value = "AccountCard")
 	@Override
-	public Mono<AccountCard> findById(Long idAccountCard) {
+	public AccountCard findById(Long idAccountCard) {
 		// TODO Auto-generated method stub
+		log.info("Go Repository...");
+		return accountCardRepository.findById(idAccountCard).blockOptional().orElse(new AccountCard());
+	}
+
+	@Override
+	public Mono<AccountCard> findByIdMono(Long idAccountCard) {
+		// TODO Auto-generated method stub
+		//log.info("Enviando mensaje...Kafka.....");
+		//AccountCard accountCard = accountCardRepository.findById(idAccountCard).blockOptional()
+			//	.orElse(new AccountCard());
+		//this.kafkaTemplate.send("TOPIC-DEMO", "Go-->KAFKA GO TO");
+		//this.kafkaTemplate2.send("TOPIC-OBJECT", accountCard);
+		//this.kafkaTemplate2.send("TOPIC-OBJECT1", accountCard);
 		return accountCardRepository.findById(idAccountCard);
 	}
 
@@ -54,13 +82,12 @@ public class AccountCardServiceImpl implements AccountCardService {
 
 		}
 		if (accountCard.getIsMainAccount()) {
-			this.findAll().filter(e->e.getIdCard()==accountCard.getIdCard())
-			.flatMap(obj->{
-				log.info("obj:"+obj.toString());
-					obj.setIsMainAccount(false);
+			this.findAll().filter(e -> e.getIdCard() == accountCard.getIdCard()).flatMap(obj -> {
+				log.info("obj:" + obj.toString());
+				obj.setIsMainAccount(false);
 				return this.update(obj);
 			}).subscribe();
-			
+
 		}
 		accountCard.setSequence((nsecuencia != null ? nsecuencia + 1 : 1));
 		accountCard.setCreationDate(Calendar.getInstance().getTime());
@@ -84,7 +111,13 @@ public class AccountCardServiceImpl implements AccountCardService {
 	@Override
 	public Flux<AccountCard> findByIdCredit(Long idCard) {
 		// TODO Auto-generated method stub
-		return this.findAll().filter(e->e.getIdCard()==idCard);
+		return this.findAll().filter(e -> e.getIdCard() == idCard);
+	}
+
+	@Override
+	public Mono<AccountCard> findByAccountCardForExample(AccountCard accountCard) {
+		// TODO Auto-generated method stub
+		return accountCardRepository.findOne(Example.of(accountCard));
 	}
 
 	@Override
